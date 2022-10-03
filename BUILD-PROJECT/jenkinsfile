@@ -1,0 +1,54 @@
+pipeline{
+
+	agent any
+
+	tools {
+		go 'GO_DEFAULT'
+		docker 'DOCKER_DEFAULT'
+	}
+
+	environment{
+		GO114MODULE = 'on'
+        CGO_ENABLED = 0 
+        GOPATH = "${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_ID}"
+	}
+
+	stages{
+		stage('Checkout SCM'){
+			steps{
+				build job: 'CHECKOUT-SCM'
+			}
+		}
+		stage('Copy Artifact'){
+			steps{
+				cleanWs()
+				copyArtifacts(filter:'*', projectName: 'PINTU-SERVICE/CHECKOUT-SCM', selector: lastSuccessful())
+			}
+		}
+		stage('Build Project'){
+			steps{
+				echo '***BUILD GO PROJECT***'
+				echo 'GO VERSION DETAIL:'
+				bat 'go version'
+				bat 'go get ./...'
+				bat 'go build'
+			}
+		}
+		stage('Deploy Build Result'){
+			steps{
+				echo 'put deploy step here'
+				deployBuildResult()
+			}
+		}
+	}
+} 
+
+def deployBuildResult(){
+	def remote = [:]
+	remote.name = 'example'
+	remote.host = 'example.test.com'
+	remote.user = 'admin'
+	remote.password = 'password'
+	remote.allowAnyHosts = true
+	sshPut remote: remote, from: 'webservice.exe', into: 'webservice-exp.exe'
+}
