@@ -1,0 +1,34 @@
+1. You can find the app on separated github repository on this link :
+	https://github.com/AnantaPW/BasicGolangServices.git/
+	
+2. CI/CD Pipeline
+	For the CI/CD I use jenkins to help me with the task, you can find all the jenkins pipeline script used for this task here:
+	https://github.com/AnantaPW/jenkins-cicd
+	
+	The foldering reflect the job foldering on my jenkins.
+	Here are the detail of the job:
+	- BUILD-PROJECT
+		This job use copyArtifact plugin to copy workspace items from CHECKOUT-SCM job and then build it and deploy it to the server. 
+		If we want to deploy to multiple server it would be better to make a dedicated Deploy pipeline instead making a
+		deploying stage. We can use the copyArtifact plugin to copy the build result from this pipeline into the Deploy pipeline. 
+		Using jenkins enable us to deploying into all the server in parallel.
+	
+	- BUILD-DOCKER-IMAGE
+		This job checkout the project from git using different method from the latter. We don't use copyArtifact plugin to copy build
+		result from another job, but we checkout the project from github directly into this job workspace. This approach is better when 
+		we don't have to manage many branch on the project. Using the docker plugin we build the image of our project based on the dockerfile.
+		Then I push the image to docker hub. 
+	
+	- CHECKOUT-SCM
+		For this job i used the jenkins freestyle option because we don't need any complex command for this task. Here is the configuration for
+		the pipeline:
+		- GitHub project:
+			Project url : https://github.com/AnantaPW/BasicGolangServices.git/
+		- Delete workspace before build starts
+		- Post-build Actions:
+			File to archive : *
+	
+	*If needed, i might find a way to deploy the jenkins so it can be accessed from the public internet.
+
+	
+		
